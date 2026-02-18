@@ -35,6 +35,25 @@
         "path": "./syntaxes/plan.tmLanguage.json"
       }
     ],
+    "snippets": [
+      {
+        "language": "plan",
+        "path": "./snippets/plan.json"
+      }
+    ],
+    "semanticTokenScopes": [
+      {
+        "language": "plan",
+        "scopes": {
+          "keyword": ["keyword.control.plan"],
+          "type": ["keyword.control.heading.plan"],
+          "variable": ["variable.other.actor.plan"],
+          "enumMember": ["constant.language.obligation.plan"],
+          "namespace": ["entity.name.tag.reference.plan"],
+          "macro": ["entity.name.type.uncertainty.plan"]
+        }
+      }
+    ],
     "configuration": {
       "type": "object",
       "title": "Plan Language",

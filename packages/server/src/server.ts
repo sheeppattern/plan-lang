@@ -18,6 +18,13 @@ import { getFoldingRanges } from './folding.js';
 import { getHover } from './hover.js';
 import { getDefinition } from './definition.js';
 import { getCompletions } from './completion.js';
+import { getReferences } from './references.js';
+import { prepareRename, getRename } from './rename.js';
+import { getDocumentLinks } from './document-links.js';
+import { getCodeActions } from './code-actions.js';
+import { getWorkspaceSymbols } from './workspace-symbols.js';
+import { getSemanticTokens } from './semantic-tokens.js';
+import { getCodeLenses, resolveCodeLens } from './code-lens.js';
 
 // Create connection and text document manager
 const connection = createConnection(ProposedFeatures.all);
@@ -120,6 +127,52 @@ connection.onDefinition((params) => {
 
 connection.onCompletion((params) => {
   return getCompletions(params.textDocument.uri, params.position, docManager);
+});
+
+connection.onReferences((params) => {
+  return getReferences(
+    params.textDocument.uri,
+    params.position,
+    params.context,
+    docManager,
+  );
+});
+
+connection.onPrepareRename((params) => {
+  return prepareRename(params.textDocument.uri, params.position, docManager);
+});
+
+connection.onRenameRequest((params) => {
+  return getRename(
+    params.textDocument.uri,
+    params.position,
+    params.newName,
+    docManager,
+  );
+});
+
+connection.onDocumentLinks((params) => {
+  return getDocumentLinks(params.textDocument.uri, docManager);
+});
+
+connection.onCodeAction((params) => {
+  return getCodeActions(params.textDocument.uri, params, docManager);
+});
+
+connection.onWorkspaceSymbol((params) => {
+  return getWorkspaceSymbols(params.query, docManager);
+});
+
+connection.languages.semanticTokens.on((params) => {
+  return getSemanticTokens(params.textDocument.uri, docManager);
+});
+
+connection.onCodeLens((params) => {
+  return getCodeLenses(params.textDocument.uri, docManager);
+});
+
+connection.onCodeLensResolve((codeLens) => {
+  return resolveCodeLens(codeLens, docManager);
 });
 
 // ── Start ─────────────────────────────────────────────────────

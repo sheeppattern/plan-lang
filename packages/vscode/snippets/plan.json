@@ -1,0 +1,86 @@
+{
+  "Feature Template": {
+    "prefix": "plan-feature",
+    "body": [
+      "---",
+      "type: feature",
+      "id: ${1:feat-id}",
+      "status: draft",
+      "---",
+      "",
+      "# Feature: ${2:Feature Title}",
+      "",
+      "Goal: ${3:What this feature achieves}",
+      "Persona: @${4:actor}",
+      "Metric: ${5:How success is measured}",
+      "",
+      "## Story: ${6:Story Title}",
+      "",
+      "Goal: ${7:Story goal}",
+      "Given: ${8:precondition}",
+      "When: ${9:action}",
+      "Then: ${10:outcome} [${11|MUST,SHOULD,MAY|}]",
+      "",
+      "### Task: ${12:Task Title}",
+      "",
+      "Assign: @${13:assignee}",
+      "Verify: ${14:verification criteria}",
+      "$0"
+    ],
+    "description": "Complete Feature file template with frontmatter, story, and task"
+  },
+  "Story Block": {
+    "prefix": "plan-story",
+    "body": [
+      "## Story: ${1:Story Title}",
+      "",
+      "Goal: ${2:Story goal}",
+      "Given: ${3:precondition}",
+      "When: ${4:action}",
+      "Then: ${5:outcome} [${6|MUST,SHOULD,MAY|}]",
+      "$0"
+    ],
+    "description": "Story block with Goal and Given/When/Then"
+  },
+  "Task Block": {
+    "prefix": "plan-task",
+    "body": [
+      "### Task: ${1:Task Title}",
+      "",
+      "Assign: @${2:assignee}",
+      "Verify: ${3:verification criteria}",
+      "$0"
+    ],
+    "description": "Task block with Assign and Verify"
+  },
+  "Edge Case": {
+    "prefix": "plan-edge",
+    "body": [
+      "Edge: ${1:edge case description}",
+      "When: ${2:edge condition}",
+      "Then: ${3:expected handling} [${4|MUST,SHOULD,MAY|}]",
+      "$0"
+    ],
+    "description": "Edge case with When/Then"
+  },
+  "Behavior Block": {
+    "prefix": "plan-behavior",
+    "body": [
+      "Given: ${1:precondition}",
+      "When: ${2:action}",
+      "Then: ${3:outcome} [${4|MUST,SHOULD,MAY|}]",
+      "$0"
+    ],
+    "description": "Given/When/Then behavior specification"
+  },
+  "Uncertainty Block": {
+    "prefix": "plan-uncertainty",
+    "body": [
+      "?${1|pending,assumption,alternative,risk|} \"${2:description}\"",
+      "${3:details}",
+      "?end",
+      "$0"
+    ],
+    "description": "Uncertainty block (?pending...?end)"
+  }
+}
