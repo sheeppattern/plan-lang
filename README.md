@@ -289,6 +289,18 @@ const { resolved, unresolved } = resolveReferences(project.documents);
 npm install
 ```
 
+## 문서
+
+| 문서 | 설명 |
+|------|------|
+| [소개](./docs/01-introduction.md) | Plan Language란 무엇인가 — 동기, 철학, 비교 |
+| [빠른 시작](./docs/02-quick-start.md) | 5분 안에 첫 .plan 파일 작성하기 |
+| [핵심 개념](./docs/03-core-concepts.md) | 계층, 상태 모델, 불확실성, 의존성, 참조 |
+| [키워드 레퍼런스](./docs/04-keywords-reference.md) | 12개 키워드 완전 가이드 |
+| [도구 활용](./docs/05-tooling.md) | CLI, VS Code 확장, 린트 규칙 상세 |
+| [프로젝트 관리](./docs/06-project-management.md) | 다중 파일 프로젝트, 교차 파일 검증 |
+| [API 레퍼런스](./docs/07-api-reference.md) | 프로그래밍 API 레퍼런스 |
+
 문법 전체 명세는 [GRAMMAR.md](./examples/files/GRAMMAR.md), 예제 `.plan` 파일은 [examples/files/](./examples/files/) 디렉토리를 참고한다.
 
 ## 라이선스
