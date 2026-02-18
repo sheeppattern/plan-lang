@@ -1,0 +1,93 @@
+---
+type: feature
+id: index
+status: in_progress
+owner: @max
+tags: [project-overview]
+created: 2026-02-18
+---
+
+# Feature: 프로젝트 의존성 맵
+
+Goal: 모든 기획 문서 간의 관계를 한눈에 파악한다
+
+<!-- 
+  이 파일은 프로젝트 루트에 위치하는 인덱스 파일이다.
+  개별 .plan 파일들의 관계를 시각화하고,
+  전체 프로젝트의 상태를 집계하여 보여준다.
+-->
+
+---
+
+## 의존성 그래프
+
+```mermaid
+graph LR
+    subgraph "인증 도메인"
+        A[feat-email-auth<br/>🟡 in_progress] 
+    end
+    
+    subgraph "소셜 로그인"
+        B[feat-social-login<br/>📝 draft]
+    end
+    
+    subgraph "결제 도메인"
+        C[feat-payment<br/>🔴 blocked]
+        D[feat-plan-management<br/>⬜ 미생성]
+    end
+    
+    subgraph "후속 기능"
+        E[feat-account-linking<br/>⬜ 미생성]
+        F[feat-billing-dashboard<br/>⬜ 미생성]
+        G[feat-team-billing<br/>⬜ 미생성]
+    end
+
+    A -->|Blocks| B
+    A -->|Blocks| E
+    B -->|Blocks| E
+    D -->|Needs| C
+    C -->|Blocks| F
+    C -->|Blocks| G
+
+    style A fill:#FFF3CD,stroke:#856404
+    style B fill:#F8F9FA,stroke:#6C757D
+    style C fill:#F8D7DA,stroke:#842029
+    style D fill:#E9ECEF,stroke:#ADB5BD,stroke-dasharray: 5 5
+    style E fill:#E9ECEF,stroke:#ADB5BD,stroke-dasharray: 5 5
+    style F fill:#E9ECEF,stroke:#ADB5BD,stroke-dasharray: 5 5
+    style G fill:#E9ECEF,stroke:#ADB5BD,stroke-dasharray: 5 5
+```
+
+## 외부 의존성
+
+| 외부 항목 | 필요한 기능 | 상태 |
+|-----------|------------|------|
+| Google OAuth 클라이언트 ID | [feat-social-login] | ?pending("발급 요청 완료, 승인 대기") |
+| Apple Developer Sign in with Apple | [feat-social-login] | ?pending("설정 미시작") |
+| PG사 계약 (Stripe vs Paddle) | [feat-payment] | ?pending("비교 검토 중") |
+| PG사 테스트 환경 접근 | [feat-payment] | ?pending("계약 후 발급") |
+
+## 불확실성 집계
+
+```
+[PROJECT UNCERTAINTY REPORT]
+
+feat-social-login.plan
+  ?pending:     1개   Apple 로그인 설정 대기
+  ?assumption:  2개   업계 벤치마크, Apple 릴레이 SLA
+  
+feat-payment.plan
+  ?pending:     3개   PG사 선정, 담당자 배정(x2)
+  ?assumption:  2개   체크아웃 시간, 카드 삭제 API
+  ?alternative: 1개   연간 할인율 의사결정
+  ?risk:        1개   초기 이탈률 변동
+
+feat-email-auth.plan
+  ?pending:     0개
+  ?assumption:  0개
+  
+──────────────────────────────
+총계: ?pending 4개 | ?assumption 4개 | ?alternative 1개 | ?risk 1개
+크리티컬 패스: feat-email-auth → feat-social-login → feat-account-linking
+병목 지점: feat-payment (외부 의존성 3개로 blocked)
+```

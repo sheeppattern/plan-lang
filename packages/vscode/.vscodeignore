@@ -1,0 +1,12 @@
+src/**
+node_modules/**
+.vscode/**
+tsconfig.json
+esbuild.mjs
+*.ts
+**/*.map
+!dist/extension.js
+!server/server.js
+!syntaxes/**
+!language-configuration.json
+!package.json

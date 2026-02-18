@@ -1,0 +1,112 @@
+---
+type: feature
+id: feat-payment
+status: blocked
+version: 0.1.0
+owner: @max
+priority: urgent
+tags: [payment, monetization, mvp]
+created: 2026-02-15
+updated: 2026-02-18
+---
+
+# Feature: 결제 시스템
+
+Goal: 유료 플랜 사용자가 안전하고 빠르게 결제를 완료할 수 있게 한다
+Persona: @paid_user — 무료 체험 후 유료 전환을 결정한 사용자
+Metric: payment_success_rate > 98%
+Metric: checkout_to_payment_time < 60s ?assumption("업계 평균 45~90초 기반")
+Metric: monthly_churn_rate < 5% ?risk("초기 가격 정책이 불안정하여 이탈률 변동 가능")
+
+Needs: [feat-plan-management] 플랜 관리 기능 완성
+Needs: [external] PG사 계약 체결 ?pending("Stripe vs Paddle 최종 선정 대기")
+Blocks: [feat-billing-dashboard] 결제 내역 대시보드
+Blocks: [feat-team-billing] 팀 결제 기능
+
+---
+
+## Story: 신용카드로 월간 구독 결제
+
+Goal: 가장 일반적인 결제 경로를 빠르고 안전하게 처리한다
+
+Given: @paid_user가 유료 플랜을 선택한 상태
+When: 카드 정보를 입력하고 "결제하기" 버튼을 탭
+Then: PG사를 통해 결제를 처리한다 [MUST] ?pending("PG사 선정 미완료")
+Then: 결제 성공 시 즉시 유료 기능이 활성화 [MUST]
+Then: 결제 확인 이메일을 발송 [MUST]
+Then: 다음 결제일과 금액을 명확히 표시 [SHOULD]
+
+Edge: "카드 결제 실패 (잔액 부족, 카드 만료 등)"
+  When: PG사가 결제 실패 응답을 반환
+  Then: 구체적인 실패 사유를 사용자에게 표시 [MUST]
+  Then: 카드 정보 재입력 화면을 제공 [MUST]
+  Then: 3회 연속 실패 시 고객지원 연결 안내 [SHOULD]
+  Then: 실패 이벤트를 분석 시스템에 기록 [MUST]
+
+Edge: "결제 처리 중 네트워크 중단"
+  When: PG사 API 호출 후 응답 수신 전에 연결이 끊김
+  Then: 멱등성 키를 사용하여 중복 결제를 방지 [MUST]
+  Then: 결제 상태 확인 API로 최종 상태를 조회 [MUST]
+  Then: 불확실한 상태가 5분 이상 지속 시 사용자에게 확인 안내 [SHOULD]
+
+Edge: "결제 중 앱이 백그라운드로 전환되는 경우"
+  When: 결제 진행 중 사용자가 앱을 벗어남
+  Then: 앱 복귀 시 결제 상태를 자동 확인 [MUST]
+  Then: 이미 결제 완료된 경우 성공 화면 표시 [MUST]
+
+### Task: PG사 결제 API 연동
+
+Assign: @backend-agent ?pending("PG사 확정 후 담당 배정")
+Needs: [external] PG사 계약 체결
+Needs: [external] PG사 테스트 환경 접근 권한
+Verify: 테스트 모드에서 결제 → 취소 → 환불 전체 플로우 통과
+Verify: 멱등성 키 기반 중복 결제 방지 테스트 통과
+Verify: PCI DSS 관련 카드 정보 비저장 정책 준수
+
+### Task: 결제 UI 구현
+
+Assign: @frontend-agent
+Needs: [feat-payment#task-pg-api] PG사 API 연동 완료
+Verify: 카드 입력 폼 유효성 검사 정상 동작
+Verify: 결제 진행 중 로딩 상태 표시
+Verify: 성공/실패 각 상태의 UI가 디자인 시스템 준수
+Verify: 접근성 — 키보드 네비게이션으로 전체 결제 플로우 완료 가능
+
+### Task: 결제 웹훅 수신 처리
+
+Assign: @backend-agent ?pending("PG사 확정 후 담당 배정")
+Needs: [feat-payment#task-pg-api] PG사 API 연동 완료
+Verify: 웹훅 서명 검증 로직 통과
+Verify: 결제 성공 웹훅 수신 시 플랜 활성화 확인
+Verify: 결제 실패 웹훅 수신 시 유예 기간 시작 확인
+Verify: 중복 웹훅 수신 시 멱등 처리 확인
+
+---
+
+## Story: 결제 수단 변경
+
+Goal: 기존 유료 사용자가 카드 정보를 안전하게 업데이트할 수 있게 한다
+
+Given: @paid_user가 활성 구독을 보유한 상태
+When: 설정 > 결제 > "카드 변경" 버튼을 탭
+Then: 새 카드 정보 입력 폼을 표시 [MUST]
+Then: 새 카드로 0원 인증 결제를 수행하여 유효성 확인 [MUST]
+Then: 성공 시 다음 결제부터 새 카드를 사용 [MUST]
+Then: 이전 카드 정보를 안전하게 삭제 [SHOULD] ?assumption("PG사가 카드 정보 삭제 API를 제공한다고 가정")
+
+Edge: "새 카드 인증 실패"
+  When: 0원 인증이 실패
+  Then: 기존 카드를 유지하고 에러 메시지 표시 [MUST]
+  Then: 사용자의 구독 상태에 영향 없음 [MUST]
+
+---
+
+## Story: 연간 구독으로 전환
+
+?alternative "연간 할인율 — 20% vs 30% vs 2개월 무료"
+  Given: @paid_user가 월간 구독 중인 상태
+  When: "연간 플랜으로 전환" 버튼을 탭
+  Then: 잔여 월간 구독 기간을 일할 계산하여 크레딧 적용 [MUST]
+  Then: 연간 구독 가격에서 크레딧을 차감한 금액을 청구 [MUST]
+  Then: 할인 혜택을 명확히 시각적으로 비교 표시 [SHOULD]
+?end

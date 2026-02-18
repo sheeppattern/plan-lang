@@ -1,0 +1,74 @@
+{
+  "name": "plan-lang-vscode",
+  "displayName": "Plan Language",
+  "description": "VS Code support for the .plan specification language",
+  "version": "0.1.0",
+  "publisher": "plan-lang",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:plan"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "plan",
+        "aliases": [
+          "Plan",
+          "plan"
+        ],
+        "extensions": [
+          ".plan"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "plan",
+        "scopeName": "source.plan",
+        "path": "./syntaxes/plan.tmLanguage.json"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Plan Language",
+      "properties": {
+        "planLanguage.disabledRules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Lint rule IDs to disable (e.g. PLAN-005, PLAN-007)"
+        },
+        "planLanguage.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Traces the communication between VS Code and the language server"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "package": "node esbuild.mjs --production && npx @vscode/vsce package --no-dependencies --allow-missing-repository"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.27.3"
+  }
+}

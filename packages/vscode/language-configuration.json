@@ -1,0 +1,31 @@
+{
+  "comments": {
+    "blockComment": ["<!--", "-->"]
+  },
+  "brackets": [
+    ["[", "]"],
+    ["(", ")"]
+  ],
+  "autoClosingPairs": [
+    { "open": "[", "close": "]" },
+    { "open": "(", "close": ")" },
+    { "open": "\"", "close": "\"" },
+    { "open": "\u201c", "close": "\u201d" },
+    { "open": "<!--", "close": " -->" }
+  ],
+  "surroundingPairs": [
+    ["[", "]"],
+    ["(", ")"],
+    ["\"", "\""]
+  ],
+  "indentationRules": {
+    "increaseIndentPattern": "^(##?#?\\s+(Feature|Story|Task):|Edge:|\\?(pending|assumption|alternative|risk)\\s)",
+    "decreaseIndentPattern": "^\\s*\\?end"
+  },
+  "folding": {
+    "markers": {
+      "start": "^(---|#|##|###|Edge:|\\?(pending|assumption|alternative|risk)\\s|<!--(?!.*-->))",
+      "end": "^(---|\\?end|-->)"
+    }
+  }
+}

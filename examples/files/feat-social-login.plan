@@ -1,0 +1,92 @@
+---
+type: feature
+id: feat-social-login
+status: draft
+version: 0.1.0
+owner: @max
+priority: high
+tags: [auth, onboarding, mvp]
+created: 2026-02-18
+updated: 2026-02-18
+---
+
+# Feature: 소셜 로그인
+
+Goal: 신규 유저의 가입 허들을 낮춰 가입 전환율을 높인다
+Persona: @new_user — 앱을 처음 설치한 사용자, 복잡한 가입 절차에 거부감이 큼
+Metric: signup_conversion_rate > 40%
+Metric: social_login_ratio > 60% ?assumption("업계 벤치마크 기반 가정, 출시 후 검증 필요")
+
+Needs: [feat-email-auth] 이메일 인증 시스템 리팩토링 완료
+Needs: [external] Google OAuth 클라이언트 ID 발급
+Blocks: [feat-account-linking] 계정 연동 기능
+
+---
+
+## Story: Google 계정으로 가입
+
+Goal: 가장 많이 사용하는 소셜 계정으로 원탭 가입을 제공한다
+
+Given: @new_user가 가입 화면에 도달한 상태
+When: "Google로 계속하기" 버튼을 탭
+Then: Google OAuth 인증 후 3초 이내 홈 화면으로 이동 [MUST]
+Then: 사용자 프로필에 Google 계정 이메일과 프로필 이미지가 자동 세팅 [SHOULD]
+Then: 환영 온보딩 투어가 시작 [MAY]
+
+Edge: "Google 계정에 이메일이 없는 경우"
+  When: OAuth 응답에 email 필드가 비어있음
+  Then: 이메일 입력 폼을 추가로 표시 [MUST]
+  Then: 입력한 이메일로 인증 코드 발송 [MUST]
+
+Edge: "이미 같은 이메일로 가입된 계정이 존재하는 경우"
+  When: 반환된 이메일이 기존 계정의 이메일과 일치
+  Then: 기존 계정 연동 확인 모달을 표시 [MUST]
+  Then: 연동 과정에서 기존 계정 데이터 손실 없음 [MUST]
+  Then: 사용자가 연동을 거부할 경우 새 계정 생성을 선택할 수 있음 [SHOULD]
+
+Edge: "OAuth 인증 실패 (네트워크 에러, 사용자 취소)"
+  When: Google OAuth 콜백이 에러를 반환하거나 사용자가 인증을 취소
+  Then: 사용자에게 명확한 에러 메시지를 표시 [MUST]
+  Then: 가입 화면으로 복귀, 이전 상태 보존 [MUST]
+  Then: 에러를 로깅 시스템에 기록 [SHOULD]
+
+### Task: OAuth 콜백 핸들러 구현
+
+Assign: @backend-agent
+Needs: [external] Google OAuth 클라이언트 ID 발급
+Verify: `npm test -- --grep "oauth callback"` 전체 통과
+Verify: Google OAuth 토큰 교환 성공 시 JWT 발급 확인
+Verify: 토큰 만료 시 리프레시 플로우 정상 동작
+
+### Task: 소셜 로그인 UI 컴포넌트 개발
+
+Assign: @frontend-agent
+Needs: [feat-social-login#task-oauth-callback] OAuth 핸들러 API 완성
+Verify: Google 로그인 버튼이 디자인 시스템 가이드라인 준수
+Verify: 로딩 상태, 에러 상태, 성공 상태 각각의 UI가 올바르게 렌더링
+Verify: 접근성 — 스크린 리더에서 버튼 역할과 상태가 올바르게 전달
+
+### Task: 기존 계정 연동 로직 구현
+
+Assign: @backend-agent
+Needs: [feat-email-auth] 이메일 인증 시스템 리팩토링 완료
+Verify: 동일 이메일 감지 시 연동 프롬프트 정상 표시
+Verify: 연동 완료 후 두 계정의 데이터가 정확히 병합
+Verify: 연동 거부 시 새 계정이 별도 이메일로 생성 ?pending("이메일 변경 플로우 확정 필요")
+
+---
+
+## Story: Apple 계정으로 가입
+
+Goal: iOS 사용자를 위한 네이티브 로그인 경험을 제공한다
+
+?pending "Apple Developer 계정의 Sign in with Apple 설정 완료 대기"
+  Given: @new_user가 iOS 디바이스에서 가입 화면에 도달한 상태
+  When: "Apple로 계속하기" 버튼을 탭
+  Then: Apple 인증 후 홈 화면으로 이동 [MUST]
+?end
+
+Edge: "Apple의 이메일 숨기기(Hide My Email) 사용 시"
+  When: Apple이 릴레이 이메일(@privaterelay.appleid.com)을 반환
+  Then: 릴레이 이메일을 사용자 이메일로 저장 [MUST]
+  Then: 향후 이메일 커뮤니케이션이 릴레이를 통해 정상 전달 [MUST] ?assumption("Apple 릴레이 서비스 SLA 99.9% 기반")

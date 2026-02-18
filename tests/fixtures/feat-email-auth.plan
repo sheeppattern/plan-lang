@@ -1,0 +1,73 @@
+---
+type: feature
+id: feat-email-auth
+status: in_progress
+version: 1.2.0
+owner: @backend-team
+priority: normal
+tags: [auth, infrastructure]
+created: 2026-01-10
+updated: 2026-02-18
+---
+
+# Feature: 이메일 인증 시스템 리팩토링
+
+Goal: 레거시 이메일 인증 로직을 현대화하여 소셜 로그인과의 통합 기반을 마련한다
+Persona: @existing_user — 이메일로 가입한 기존 사용자
+Metric: auth_api_latency_p99 < 200ms
+Metric: email_delivery_success_rate > 99%
+
+Blocks: [feat-social-login] 소셜 로그인 (이메일 기반 계정 매칭에 의존)
+Blocks: [feat-account-linking] 계정 연동
+
+---
+
+## Story: 인증 토큰 체계 마이그레이션
+
+Goal: 세션 기반 인증에서 JWT 기반으로 전환하여 스케일 아웃 기반을 마련한다
+
+Given: @existing_user가 레거시 세션 쿠키로 인증된 상태
+When: 마이그레이션 배포 후 첫 API 요청
+Then: 기존 세션을 JWT로 자동 전환 [MUST]
+Then: 사용자에게 재로그인을 요구하지 않음 [MUST]
+Then: 마이그레이션 완료율을 대시보드에 실시간 표시 [SHOULD]
+
+Edge: "마이그레이션 중 세션과 JWT가 공존하는 기간"
+  When: 일부 사용자는 세션, 일부는 JWT를 사용하는 과도기
+  Then: 두 인증 방식을 동시에 수용하는 미들웨어 운영 [MUST]
+  Then: 마이그레이션 30일 후 세션 인증 종료 공지 [SHOULD]
+
+### Task: JWT 발급/검증 모듈 구현
+
+Assign: @backend-agent
+Verify: `npm test -- --grep "jwt"` 전체 통과
+Verify: 토큰 발급, 갱신, 폐기 전체 플로우 동작
+Verify: RS256 서명 검증 성공
+
+### Task: 세션→JWT 자동 전환 미들웨어 구현
+
+Assign: @backend-agent
+Needs: [feat-email-auth#task-jwt-module] JWT 모듈 완성
+Verify: 기존 세션 쿠키 감지 시 JWT 자동 발급 확인
+Verify: 전환 후 기존 세션 무효화 확인
+Verify: 전환 실패 시 기존 세션 유지 (폴백)
+
+---
+
+## Story: 이메일 인증 코드 발송 개선
+
+Goal: 인증 코드 도달률과 보안을 동시에 향상시킨다
+
+Given: 사용자가 이메일 인증이 필요한 행동을 시도한 상태
+When: 시스템이 인증 코드를 발송
+Then: 6자리 숫자 코드를 이메일로 전송 [MUST]
+Then: 코드 유효 시간은 10분 [MUST]
+Then: 코드 입력 5회 실패 시 30분 잠금 [MUST]
+Then: 재발송 요청 간 최소 60초 쿨다운 [SHOULD]
+
+### Task: 이메일 전송 서비스 교체
+
+Assign: @backend-agent
+Verify: SendGrid API 연동 및 테스트 환경 발송 확인
+Verify: 발송 실패 시 SQS 기반 재시도 큐 동작 확인
+Verify: 일 10만 건 발송 부하 테스트 통과

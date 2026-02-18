@@ -1,0 +1,39 @@
+{
+  "name": "plan-lang",
+  "version": "0.1.0",
+  "description": "Parser, linter, and CLI for the .plan specification language",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "bin": {
+    "plan": "./bin/plan.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "build:server": "npm run build && cd packages/server && npx tsc -p tsconfig.json",
+    "build:vscode": "npm run build:server && cd packages/vscode && npx tsc -p tsconfig.json",
+    "build:all": "npm run build:vscode",
+    "test": "vitest run",
+    "test:server": "cd packages/server && npx vitest run",
+    "test:all": "npm test && npm run test:server",
+    "test:watch": "vitest",
+    "lint": "tsx bin/plan.ts lint"
+  },
+  "dependencies": {
+    "commander": "^13.1.0",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.13.4",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.6"
+  }
+}

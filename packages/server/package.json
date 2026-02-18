@@ -1,0 +1,20 @@
+{
+  "name": "plan-lang-server",
+  "version": "0.1.0",
+  "description": "LSP server for the .plan specification language",
+  "type": "module",
+  "main": "./src/server.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "plan-lang": "file:../../",
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.12"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.18"
+  }
+}
