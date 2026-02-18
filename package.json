@@ -17,7 +17,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "build:server": "npm run build && cd packages/server && npx tsc -p tsconfig.json",
-    "build:vscode": "npm run build:server && cd packages/vscode && npx tsc -p tsconfig.json",
+    "build:vscode": "npm run build:server && cd packages/vscode && node esbuild.mjs",
     "build:all": "npm run build:vscode",
     "test": "vitest run",
     "test:server": "cd packages/server && npx vitest run",
