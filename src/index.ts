@@ -78,3 +78,7 @@ export type { FormatOptions, FormatResult } from './formatter/format-types.js';
 // Converter
 export { convert, getSupportedFormats } from './converter/index.js';
 export type { ConvertFormat, Converter } from './converter/converter-types.js';
+
+// Boilerplate
+export { generatePlanFile, validateId, renderTemplate, getTemplate, listTemplates, loadCustomTemplates, findSimilarTemplate } from './boilerplate/index.js';
+export type { BuiltinTemplateName, TemplateVariables, TemplateDefinition, GenerateOptions, GenerateResult } from './boilerplate/index.js';

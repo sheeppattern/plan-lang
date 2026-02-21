@@ -2,7 +2,9 @@
  * VS Code extension entry point: starts the plan-lang LSP client.
  */
 import * as path from 'node:path';
+import * as vscode from 'vscode';
 import type { ExtensionContext } from 'vscode';
+import { newPlanFileCommand } from './new-file-command.js';
 import {
   LanguageClient,
   TransportKind,
@@ -45,6 +47,11 @@ export function activate(context: ExtensionContext): void {
   );
 
   client.start();
+
+  // Register commands
+  context.subscriptions.push(
+    vscode.commands.registerCommand('plan.newFile', newPlanFileCommand),
+  );
 }
 
 export function deactivate(): Promise<void> | undefined {

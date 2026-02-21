@@ -11,7 +11,8 @@
     "Programming Languages"
   ],
   "activationEvents": [
-    "onLanguage:plan"
+    "onLanguage:plan",
+    "onCommand:plan.newFile"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -54,6 +55,21 @@
         }
       }
     ],
+    "commands": [
+      {
+        "command": "plan.newFile",
+        "title": "Plan: New File"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "when": "explorerResourceIsFolder",
+          "command": "plan.newFile",
+          "group": "navigation@10"
+        }
+      ]
+    },
     "configuration": {
       "type": "object",
       "title": "Plan Language",

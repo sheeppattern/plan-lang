@@ -6,6 +6,8 @@ import { runLintProjectCommand } from '../src/cli/lint-project-command.js';
 import { runUncertaintyCommand } from '../src/cli/uncertainty-command.js';
 import { runFormatCommand } from '../src/cli/format-command.js';
 import { runConvertCommand } from '../src/cli/convert-command.js';
+import { runInitCommand } from '../src/cli/init-command.js';
+import { runTemplatesCommand } from '../src/cli/templates-command.js';
 
 const program = new Command();
 
@@ -70,6 +72,23 @@ program
   .option('--output <file>', 'Output file path (default: stdout)')
   .action((file, options) => {
     runConvertCommand(file, options);
+  });
+
+program
+  .command('init <id>')
+  .description('Create a new .plan file from a template')
+  .option('--template <name>', 'Template to use: default, minimal, full, or custom', 'default')
+  .option('--owner <name>', 'Owner name for the @owner field')
+  .option('--force', 'Overwrite existing file')
+  .action((id, options) => {
+    runInitCommand(id, options);
+  });
+
+program
+  .command('templates')
+  .description('List available boilerplate templates')
+  .action(() => {
+    runTemplatesCommand();
   });
 
 program.parse();
