@@ -4,6 +4,8 @@ export interface LintContext {
   document: PlanDocument;
   /** Available only during project-level linting */
   projectFiles?: Map<string, PlanDocument>;
+  /** Map of duplicate IDs → file paths (project-level only) */
+  duplicateIds?: Map<string, string[]>;
 }
 
 export interface LintRule {

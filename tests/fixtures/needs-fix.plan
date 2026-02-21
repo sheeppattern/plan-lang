@@ -1,0 +1,22 @@
+---
+type: feature
+id: feat-needs-fix
+status: draft
+owner: @tester
+---
+
+# Feature: 수정이 필요한 기능
+
+Persona: @user — 일반 사용자
+
+---
+
+## Story: 수정 대상 스토리
+
+Given: @user가 로그인한 상태
+When: 어떤 행동을 수행
+Then: 결과가 반환된다
+
+### Task: 수정 대상 태스크
+
+Verify: 테스트 통과 확인

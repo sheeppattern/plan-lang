@@ -4,12 +4,14 @@ import { parsePlanFile } from '../parser/index.js';
 import { LintEngine } from '../linter/index.js';
 import { formatTextReport } from '../reporters/text-reporter.js';
 import { formatJsonReport } from '../reporters/json-reporter.js';
+import { getFixesForDiagnostics, applyFixes } from '../fixer/index.js';
 
 export interface LintCommandOptions {
   format?: string;
   quiet?: boolean;
   disable?: string[];
   severity?: string;
+  fix?: boolean;
 }
 
 export function runLintCommand(files: string[], options: LintCommandOptions): void {
@@ -17,12 +19,34 @@ export function runLintCommand(files: string[], options: LintCommandOptions): vo
   let allDiagnostics: Diagnostic[] = [];
 
   for (const filePath of files) {
-    const source = fs.readFileSync(filePath, 'utf-8');
-    const doc = parsePlanFile(source, filePath);
-    const diagnostics = engine.lint(doc, {
+    let source = fs.readFileSync(filePath, 'utf-8');
+    let doc = parsePlanFile(source, filePath);
+    let diagnostics = engine.lint(doc, {
       disabledRules: options.disable,
       source,
     });
+
+    if (options.fix && diagnostics.length > 0) {
+      const sourceLines = source.split(/\n/);
+      const fixes = getFixesForDiagnostics(diagnostics, sourceLines);
+
+      if (fixes.length > 0) {
+        const { output, applied } = applyFixes(source, fixes);
+        fs.writeFileSync(filePath, output, 'utf-8');
+
+        // Re-lint to get remaining diagnostics
+        source = output;
+        doc = parsePlanFile(source, filePath);
+        const remaining = engine.lint(doc, {
+          disabledRules: options.disable,
+          source,
+        });
+
+        console.log(`${filePath}: Fixed ${applied.length} issue(s) (${remaining.length} remaining)`);
+        diagnostics = remaining;
+      }
+    }
+
     allDiagnostics.push(...diagnostics);
   }
 

@@ -63,4 +63,18 @@ export {
   parseObligation,
   parseActorReferences,
   parseReferences,
+  stripUncertainty,
+  stripObligation,
 } from './parser/inline-parser.js';
+
+// Fixer
+export { applyFixes, getFixesForDiagnostics, getFixableRuleIds } from './fixer/index.js';
+export type { Fix, FixProvider, FixResult } from './fixer/fix-types.js';
+
+// Formatter
+export { formatPlanSource } from './formatter/index.js';
+export type { FormatOptions, FormatResult } from './formatter/format-types.js';
+
+// Converter
+export { convert, getSupportedFormats } from './converter/index.js';
+export type { ConvertFormat, Converter } from './converter/converter-types.js';

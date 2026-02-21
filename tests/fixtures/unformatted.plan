@@ -1,0 +1,31 @@
+---
+owner: @max
+status: draft
+tags: [test, formatting]
+id: feat-unformatted
+type: feature
+priority: normal
+created: 2026-02-18
+version: 0.1.0
+---
+
+# Feature: 포맷이 필요한 기능
+
+Goal: 포맷 테스트를 위한 기능
+Persona: @user — 테스트 사용자
+Metric: test_metric > 90%
+
+
+---
+
+
+## Story: 포맷 대상 스토리
+
+Given: @user가 접속한 상태
+When: 포맷 커맨드를 실행
+Then: 올바르게 정렬된 결과를 확인 [MUST]
+
+### Task: 포맷 태스크
+
+Assign: @dev
+Verify: 포맷 결과 확인

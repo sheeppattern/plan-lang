@@ -4,6 +4,8 @@ import { runParseCommand } from '../src/cli/parse-command.js';
 import { runLintCommand } from '../src/cli/lint-command.js';
 import { runLintProjectCommand } from '../src/cli/lint-project-command.js';
 import { runUncertaintyCommand } from '../src/cli/uncertainty-command.js';
+import { runFormatCommand } from '../src/cli/format-command.js';
+import { runConvertCommand } from '../src/cli/convert-command.js';
 
 const program = new Command();
 
@@ -27,6 +29,7 @@ program
   .option('--quiet', 'Only output if there are diagnostics')
   .option('--disable <rules...>', 'Disable specific rules (e.g., PLAN-005 PLAN-006)')
   .option('--severity <level>', 'Minimum severity to report: error, warning, or info', 'info')
+  .option('--fix', 'Automatically fix fixable issues')
   .action((files, options) => {
     runLintCommand(files, options);
   });
@@ -38,6 +41,7 @@ program
   .option('--quiet', 'Only output if there are diagnostics')
   .option('--disable <rules...>', 'Disable specific rules')
   .option('--severity <level>', 'Minimum severity to report', 'info')
+  .option('--fix', 'Automatically fix fixable issues')
   .action((dir, options) => {
     runLintProjectCommand(dir, options);
   });
@@ -48,6 +52,24 @@ program
   .option('--format <format>', 'Output format: text or json', 'text')
   .action((files, options) => {
     runUncertaintyCommand(files, options);
+  });
+
+program
+  .command('format <files...>')
+  .description('Format .plan files (frontmatter key order, whitespace normalization)')
+  .option('--write', 'Write formatted output back to files')
+  .option('--check', 'Check if files need formatting (exit code 1 if so)')
+  .action((files, options) => {
+    runFormatCommand(files, options);
+  });
+
+program
+  .command('convert <file>')
+  .description('Convert a .plan file to another format')
+  .requiredOption('--to <format>', 'Target format: json, markdown, or csv')
+  .option('--output <file>', 'Output file path (default: stdout)')
+  .action((file, options) => {
+    runConvertCommand(file, options);
   });
 
 program.parse();

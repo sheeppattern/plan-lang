@@ -7,6 +7,8 @@ export interface ProjectLoadResult {
   documents: Map<string, PlanDocument>;
   sources: Map<string, string>;
   errors: string[];
+  /** Map of duplicate IDs → file paths where each ID appears */
+  duplicateIds: Map<string, string[]>;
 }
 
 /**
@@ -17,6 +19,10 @@ export function loadProject(dirPath: string): ProjectLoadResult {
   const documents = new Map<string, PlanDocument>();
   const sources = new Map<string, string>();
   const errors: string[] = [];
+  const duplicateIds = new Map<string, string[]>();
+
+  // Track which files have each ID (for duplicate detection)
+  const idToFiles = new Map<string, string[]>();
 
   const planFiles = findPlanFiles(dirPath);
 
@@ -26,8 +32,16 @@ export function loadProject(dirPath: string): ProjectLoadResult {
       const doc = parsePlanFile(source, filePath);
 
       if (doc.frontmatter?.id) {
-        documents.set(doc.frontmatter.id, doc);
-        sources.set(doc.frontmatter.id, source);
+        const id = doc.frontmatter.id;
+
+        // Track file paths per ID for duplicate detection
+        if (!idToFiles.has(id)) {
+          idToFiles.set(id, []);
+        }
+        idToFiles.get(id)!.push(filePath);
+
+        documents.set(id, doc);
+        sources.set(id, source);
       } else {
         // Use filename as fallback key
         const basename = path.basename(filePath, '.plan');
@@ -39,7 +53,14 @@ export function loadProject(dirPath: string): ProjectLoadResult {
     }
   }
 
-  return { documents, sources, errors };
+  // Build duplicateIds map (only IDs that appear in multiple files)
+  for (const [id, files] of idToFiles) {
+    if (files.length > 1) {
+      duplicateIds.set(id, files);
+    }
+  }
+
+  return { documents, sources, errors, duplicateIds };
 }
 
 function findPlanFiles(dirPath: string): string[] {

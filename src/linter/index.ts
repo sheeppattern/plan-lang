@@ -10,6 +10,10 @@ import { plan007StaleAssumption } from './rules/plan-007-stale-assumption.js';
 import { plan008BlocksDraft } from './rules/plan-008-blocks-draft.js';
 import { plan009NeedsExists } from './rules/plan-009-needs-exists.js';
 import { plan010FeatureMetric } from './rules/plan-010-feature-metric.js';
+import { plan011DuplicateId } from './rules/plan-011-duplicate-id.js';
+import { plan012CircularDependency } from './rules/plan-012-circular-dependency.js';
+import { plan013UnusedPersona } from './rules/plan-013-unused-persona.js';
+import { plan014StoryNoTask } from './rules/plan-014-story-no-task.js';
 
 export { type LintRule, type LintContext } from './rule.js';
 export { walkAST } from './visitor.js';
@@ -25,6 +29,10 @@ const ALL_RULES: LintRule[] = [
   plan008BlocksDraft,
   plan009NeedsExists,
   plan010FeatureMetric,
+  plan011DuplicateId,
+  plan012CircularDependency,
+  plan013UnusedPersona,
+  plan014StoryNoTask,
 ];
 
 // Parse lint-disable/enable directives from comments
@@ -93,6 +101,7 @@ export class LintEngine {
     documents: Map<string, PlanDocument>,
     sources?: Map<string, string>,
     options?: LintOptions,
+    duplicateIds?: Map<string, string[]>,
   ): Map<string, Diagnostic[]> {
     const results = new Map<string, Diagnostic[]>();
 
@@ -100,6 +109,7 @@ export class LintEngine {
       const ctx: LintContext = {
         document: doc,
         projectFiles: documents,
+        duplicateIds,
       };
       const fileSource = sources?.get(id);
       const fileOptions = { ...options, source: fileSource };
