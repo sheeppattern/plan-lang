@@ -90,7 +90,7 @@ function makeSymbol(
 ): DocumentSymbol {
   const lspRange = planRangeToLsp(range);
   return {
-    name,
+    name: name || '(untitled)',
     detail,
     kind,
     range: lspRange,
